@@ -3,12 +3,14 @@ import { Sidebar } from './sidebar'
 import { ListPanel } from './list-panel'
 import { DetailPanel } from './detail-panel'
 import { QuickCapture } from '../quick-capture'
+import { KanbanView } from '../kanban-view'
 import { useBinItems } from '../../hooks/use-bin-items'
 import type { QuickCaptureData } from '../quick-capture'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
   const { items, createItem, promoteItem, updateItemStatus } = useBinItems()
 
   const availableTags = [...new Set(items.flatMap(i => i.tags))]
@@ -53,13 +55,44 @@ export function AppShell() {
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        <ListPanel />
-        <DetailPanel
-          onPromote={(item) => promoteItem(item)}
-          onResolve={(item) => updateItemStatus(item, 'resolved')}
-          onDrop={(item) => updateItemStatus(item, 'dropped')}
-        />
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+        {/* View toggle toolbar */}
+        <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/50">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              viewMode === 'list'
+                ? 'bg-gray-700 text-gray-100'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            List
+          </button>
+          <button
+            onClick={() => setViewMode('kanban')}
+            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              viewMode === 'kanban'
+                ? 'bg-gray-700 text-gray-100'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            Kanban
+          </button>
+        </div>
+
+        {/* View content */}
+        {viewMode === 'list' ? (
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+            <ListPanel />
+            <DetailPanel
+              onPromote={(item) => promoteItem(item)}
+              onResolve={(item) => updateItemStatus(item, 'resolved')}
+              onDrop={(item) => updateItemStatus(item, 'dropped')}
+            />
+          </div>
+        ) : (
+          <KanbanView />
+        )}
       </div>
 
       {/* Floating Action Button */}
