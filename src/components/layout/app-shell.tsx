@@ -5,6 +5,7 @@ import { DetailPanel } from './detail-panel'
 import { QuickCapture } from '../quick-capture'
 import { KanbanView } from '../kanban-view'
 import { useBinItems } from '../../hooks/use-bin-items'
+import { useToast } from '../../contexts/toast-context'
 import type { QuickCaptureData } from '../quick-capture'
 
 export function AppShell() {
@@ -12,11 +13,44 @@ export function AppShell() {
   const [captureOpen, setCaptureOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
   const { items, createItem, promoteItem, updateItemStatus } = useBinItems()
+  const { addToast } = useToast()
 
   const availableTags = [...new Set(items.flatMap(i => i.tags))]
 
   const handleSave = async (data: QuickCaptureData) => {
-    await createItem(data)
+    try {
+      await createItem(data)
+      addToast('항목이 생성되었습니다', 'success')
+    } catch {
+      addToast('오류가 발생했습니다', 'error')
+    }
+  }
+
+  const handlePromote = async (item: Parameters<typeof promoteItem>[0]) => {
+    try {
+      await promoteItem(item)
+      addToast('팀 Bin으로 승격되었습니다', 'success')
+    } catch {
+      addToast('오류가 발생했습니다', 'error')
+    }
+  }
+
+  const handleResolve = async (item: Parameters<typeof updateItemStatus>[0]) => {
+    try {
+      await updateItemStatus(item, 'resolved')
+      addToast('해결됨으로 변경되었습니다', 'success')
+    } catch {
+      addToast('오류가 발생했습니다', 'error')
+    }
+  }
+
+  const handleDrop = async (item: Parameters<typeof updateItemStatus>[0]) => {
+    try {
+      await updateItemStatus(item, 'dropped')
+      addToast('폐기되었습니다', 'info')
+    } catch {
+      addToast('오류가 발생했습니다', 'error')
+    }
   }
 
   return (
@@ -85,9 +119,9 @@ export function AppShell() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
             <ListPanel />
             <DetailPanel
-              onPromote={(item) => promoteItem(item)}
-              onResolve={(item) => updateItemStatus(item, 'resolved')}
-              onDrop={(item) => updateItemStatus(item, 'dropped')}
+              onPromote={(item) => handlePromote(item)}
+              onResolve={(item) => handleResolve(item)}
+              onDrop={(item) => handleDrop(item)}
             />
           </div>
         ) : (
