@@ -2,9 +2,16 @@ import { useState } from 'react'
 import { Sidebar } from './sidebar'
 import { ListPanel } from './list-panel'
 import { DetailPanel } from './detail-panel'
+import { QuickCapture } from '../quick-capture'
+import type { QuickCaptureData } from '../quick-capture'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [captureOpen, setCaptureOpen] = useState(false)
+
+  const handleSave = (data: QuickCaptureData) => {
+    console.log('Quick Capture saved:', data)
+  }
 
   return (
     <div className="h-screen flex flex-col lg:flex-row bg-gray-950 text-gray-100">
@@ -46,6 +53,23 @@ export function AppShell() {
         <ListPanel />
         <DetailPanel />
       </div>
+
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setCaptureOpen(true)}
+        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-2xl font-bold shadow-lg flex items-center justify-center transition-colors"
+        aria-label="Quick Capture"
+      >
+        +
+      </button>
+
+      {/* Quick Capture modal */}
+      <QuickCapture
+        open={captureOpen}
+        onClose={() => setCaptureOpen(false)}
+        onSave={handleSave}
+        availableTags={[]}
+      />
     </div>
   )
 }
