@@ -9,7 +9,7 @@ import { ToastContainer } from './components/toast'
 
 function AppContent() {
   const { user, loading } = useAuth()
-  const [isCallback, setIsCallback] = useState(window.location.pathname === '/callback')
+  const [isCallback, setIsCallback] = useState(window.location.pathname.startsWith('/callback'))
   const handleCallbackComplete = useCallback(() => setIsCallback(false), [])
 
   if (isCallback) return <OAuthCallback onComplete={handleCallbackComplete} />
