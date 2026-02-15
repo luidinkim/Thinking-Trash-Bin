@@ -1,10 +1,16 @@
+import { useState, useCallback } from 'react'
 import { AuthProvider, useAuth } from './contexts/auth-context'
 import { BinProvider } from './contexts/bin-context'
 import { LoginPage } from './components/login-page'
 import { AppShell } from './components/layout/app-shell'
+import { OAuthCallback } from './components/oauth-callback'
 
 function AppContent() {
   const { user, loading } = useAuth()
+  const [isCallback, setIsCallback] = useState(window.location.pathname === '/callback')
+  const handleCallbackComplete = useCallback(() => setIsCallback(false), [])
+
+  if (isCallback) return <OAuthCallback onComplete={handleCallbackComplete} />
 
   if (loading) {
     return (
