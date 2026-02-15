@@ -3,14 +3,18 @@ import { Sidebar } from './sidebar'
 import { ListPanel } from './list-panel'
 import { DetailPanel } from './detail-panel'
 import { QuickCapture } from '../quick-capture'
+import { useBinItems } from '../../hooks/use-bin-items'
 import type { QuickCaptureData } from '../quick-capture'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [captureOpen, setCaptureOpen] = useState(false)
+  const { items, createItem, promoteItem, updateItemStatus } = useBinItems()
 
-  const handleSave = (data: QuickCaptureData) => {
-    console.log('Quick Capture saved:', data)
+  const availableTags = [...new Set(items.flatMap(i => i.tags))]
+
+  const handleSave = async (data: QuickCaptureData) => {
+    await createItem(data)
   }
 
   return (
@@ -51,7 +55,11 @@ export function AppShell() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         <ListPanel />
-        <DetailPanel />
+        <DetailPanel
+          onPromote={(item) => promoteItem(item)}
+          onResolve={(item) => updateItemStatus(item, 'resolved')}
+          onDrop={(item) => updateItemStatus(item, 'dropped')}
+        />
       </div>
 
       {/* Floating Action Button */}
@@ -68,7 +76,7 @@ export function AppShell() {
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
         onSave={handleSave}
-        availableTags={[]}
+        availableTags={availableTags}
       />
     </div>
   )
