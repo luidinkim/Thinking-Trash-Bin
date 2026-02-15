@@ -2,6 +2,14 @@ import { Octokit } from '@octokit/rest'
 import { parseBinItem } from './markdown'
 import type { BinItem } from '../types/bin-item'
 
+function toBase64(str: string): string {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(str)))
+}
+
+function fromBase64(base64: string): string {
+  return new TextDecoder().decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)))
+}
+
 export class GitHubService {
   private octokit: Octokit
   private owner: string
@@ -35,7 +43,7 @@ export class GitHubService {
             path: f.path,
           }) as { data: { content: string; sha: string } }
 
-          const content = Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf-8')
+          const content = fromBase64(data.content.replace(/\n/g, ''))
           return parseBinItem(content, f.path, data.sha)
         }),
       )
@@ -56,7 +64,7 @@ export class GitHubService {
       path: filePath,
     }) as { data: { content: string; sha: string } }
 
-    const content = Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf-8')
+    const content = fromBase64(data.content.replace(/\n/g, ''))
     return parseBinItem(content, filePath, data.sha)
   }
 
@@ -66,7 +74,7 @@ export class GitHubService {
       repo: this.repo,
       path: filePath,
       message,
-      content: Buffer.from(content, 'utf-8').toString('base64'),
+      content: toBase64(content),
     })
 
     return data.content?.sha ?? ''
@@ -83,7 +91,7 @@ export class GitHubService {
       repo: this.repo,
       path: filePath,
       message,
-      content: Buffer.from(content, 'utf-8').toString('base64'),
+      content: toBase64(content),
       sha,
     })
 
