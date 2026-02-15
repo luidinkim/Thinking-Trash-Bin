@@ -29,8 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async (accessToken: string) => {
     const octokit = new Octokit({ auth: accessToken })
-    const { data } = await octokit.users.getAuthenticated()
-    setUser({ login: data.login, avatar_url: data.avatar_url, name: data.name })
+    const response = await octokit.request('GET /user')
+    const scopes = response.headers['x-oauth-scopes'] ?? ''
+    console.log('[ThinkBin] OAuth scopes:', scopes)
+    if (!scopes.includes('repo')) {
+      console.warn('[ThinkBin] Missing "repo" scope! Token scopes:', scopes)
+    }
+    setUser({ login: response.data.login, avatar_url: response.data.avatar_url, name: response.data.name })
     setToken(accessToken)
   }, [])
 
