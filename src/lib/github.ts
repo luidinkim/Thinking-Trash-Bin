@@ -23,11 +23,10 @@ export class GitHubService {
 
   async listItems(dirPath: string): Promise<BinItem[]> {
     try {
-      const { data: files } = await this.octokit.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: dirPath,
-      })
+      const { data: files } = await this.octokit.request(
+        `GET /repos/{owner}/{repo}/contents/{path}`,
+        { owner: this.owner, repo: this.repo, path: dirPath },
+      )
 
       if (!Array.isArray(files)) return []
 
@@ -37,11 +36,10 @@ export class GitHubService {
 
       const items = await Promise.all(
         mdFiles.map(async (f: { path: string }) => {
-          const { data } = await this.octokit.repos.getContent({
-            owner: this.owner,
-            repo: this.repo,
-            path: f.path,
-          }) as { data: { content: string; sha: string } }
+          const { data } = await this.octokit.request(
+            `GET /repos/{owner}/{repo}/contents/{path}`,
+            { owner: this.owner, repo: this.repo, path: f.path },
+          ) as { data: { content: string; sha: string } }
 
           const content = fromBase64(data.content.replace(/\n/g, ''))
           return parseBinItem(content, f.path, data.sha)
@@ -58,26 +56,28 @@ export class GitHubService {
   }
 
   async getItem(filePath: string): Promise<BinItem> {
-    const { data } = await this.octokit.repos.getContent({
-      owner: this.owner,
-      repo: this.repo,
-      path: filePath,
-    }) as { data: { content: string; sha: string } }
+    const { data } = await this.octokit.request(
+      `GET /repos/{owner}/{repo}/contents/{path}`,
+      { owner: this.owner, repo: this.repo, path: filePath },
+    ) as { data: { content: string; sha: string } }
 
     const content = fromBase64(data.content.replace(/\n/g, ''))
     return parseBinItem(content, filePath, data.sha)
   }
 
   async createItem(filePath: string, content: string, message: string): Promise<string> {
-    const { data } = await this.octokit.repos.createOrUpdateFileContents({
-      owner: this.owner,
-      repo: this.repo,
-      path: filePath,
-      message,
-      content: toBase64(content),
-    })
+    const { data } = await this.octokit.request(
+      `PUT /repos/{owner}/{repo}/contents/{path}`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        path: filePath,
+        message,
+        content: toBase64(content),
+      },
+    )
 
-    return data.content?.sha ?? ''
+    return (data as { content?: { sha?: string } }).content?.sha ?? ''
   }
 
   async updateItem(
@@ -86,26 +86,32 @@ export class GitHubService {
     sha: string,
     message: string,
   ): Promise<string> {
-    const { data } = await this.octokit.repos.createOrUpdateFileContents({
-      owner: this.owner,
-      repo: this.repo,
-      path: filePath,
-      message,
-      content: toBase64(content),
-      sha,
-    })
+    const { data } = await this.octokit.request(
+      `PUT /repos/{owner}/{repo}/contents/{path}`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        path: filePath,
+        message,
+        content: toBase64(content),
+        sha,
+      },
+    )
 
-    return data.content?.sha ?? ''
+    return (data as { content?: { sha?: string } }).content?.sha ?? ''
   }
 
   async deleteItem(filePath: string, sha: string, message: string): Promise<void> {
-    await this.octokit.repos.deleteFile({
-      owner: this.owner,
-      repo: this.repo,
-      path: filePath,
-      message,
-      sha,
-    })
+    await this.octokit.request(
+      `DELETE /repos/{owner}/{repo}/contents/{path}`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        path: filePath,
+        message,
+        sha,
+      },
+    )
   }
 
   async promoteItem(
