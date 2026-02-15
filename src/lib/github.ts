@@ -24,7 +24,7 @@ export class GitHubService {
   async listItems(dirPath: string): Promise<BinItem[]> {
     try {
       const { data: files } = await this.octokit.request(
-        `GET /repos/{owner}/{repo}/contents/{path}`,
+        `GET /repos/{owner}/{repo}/contents/{+path}`,
         { owner: this.owner, repo: this.repo, path: dirPath },
       )
 
@@ -37,7 +37,7 @@ export class GitHubService {
       const items = await Promise.all(
         mdFiles.map(async (f: { path: string }) => {
           const { data } = await this.octokit.request(
-            `GET /repos/{owner}/{repo}/contents/{path}`,
+            `GET /repos/{owner}/{repo}/contents/{+path}`,
             { owner: this.owner, repo: this.repo, path: f.path },
           ) as { data: { content: string; sha: string } }
 
@@ -57,7 +57,7 @@ export class GitHubService {
 
   async getItem(filePath: string): Promise<BinItem> {
     const { data } = await this.octokit.request(
-      `GET /repos/{owner}/{repo}/contents/{path}`,
+      `GET /repos/{owner}/{repo}/contents/{+path}`,
       { owner: this.owner, repo: this.repo, path: filePath },
     ) as { data: { content: string; sha: string } }
 
@@ -67,7 +67,7 @@ export class GitHubService {
 
   async createItem(filePath: string, content: string, message: string): Promise<string> {
     const { data } = await this.octokit.request(
-      `PUT /repos/{owner}/{repo}/contents/{path}`,
+      `PUT /repos/{owner}/{repo}/contents/{+path}`,
       {
         owner: this.owner,
         repo: this.repo,
@@ -87,7 +87,7 @@ export class GitHubService {
     message: string,
   ): Promise<string> {
     const { data } = await this.octokit.request(
-      `PUT /repos/{owner}/{repo}/contents/{path}`,
+      `PUT /repos/{owner}/{repo}/contents/{+path}`,
       {
         owner: this.owner,
         repo: this.repo,
@@ -103,7 +103,7 @@ export class GitHubService {
 
   async deleteItem(filePath: string, sha: string, message: string): Promise<void> {
     await this.octokit.request(
-      `DELETE /repos/{owner}/{repo}/contents/{path}`,
+      `DELETE /repos/{owner}/{repo}/contents/{+path}`,
       {
         owner: this.owner,
         repo: this.repo,

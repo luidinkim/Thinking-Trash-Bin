@@ -56,7 +56,7 @@ describe('GitHubService', () => {
       await service.createItem('bins/personal/dev/test.md', 'file content', 'Add item')
 
       expect(mockRequest).toHaveBeenCalledWith(
-        'PUT /repos/{owner}/{repo}/contents/{path}',
+        'PUT /repos/{owner}/{repo}/contents/{+path}',
         expect.objectContaining({
           owner: 'owner',
           repo: 'thinkbin-data',
@@ -76,7 +76,7 @@ describe('GitHubService', () => {
       await service.updateItem('bins/personal/dev/test.md', 'updated', 'sha123', 'Update item')
 
       expect(mockRequest).toHaveBeenCalledWith(
-        'PUT /repos/{owner}/{repo}/contents/{path}',
+        'PUT /repos/{owner}/{repo}/contents/{+path}',
         expect.objectContaining({ sha: 'sha123' }),
       )
     })
@@ -95,14 +95,14 @@ describe('GitHubService', () => {
       )
 
       expect(mockRequest).toHaveBeenCalledWith(
-        'DELETE /repos/{owner}/{repo}/contents/{path}',
+        'DELETE /repos/{owner}/{repo}/contents/{+path}',
         expect.objectContaining({
           path: 'bins/personal/dev/2026-02-15-test.md',
           sha: 'sha123',
         }),
       )
       expect(mockRequest).toHaveBeenCalledWith(
-        'PUT /repos/{owner}/{repo}/contents/{path}',
+        'PUT /repos/{owner}/{repo}/contents/{+path}',
         expect.objectContaining({
           path: expect.stringContaining('bins/team/'),
         }),
