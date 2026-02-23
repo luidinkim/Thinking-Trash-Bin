@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { AuthProvider, useAuth } from './contexts/auth-context'
 import { BinProvider } from './contexts/bin-context'
 import { ToastProvider } from './contexts/toast-context'
+import { SettingsProvider } from './contexts/settings-context'
 import { LoginPage } from './components/login-page'
 import { AppShell } from './components/layout/app-shell'
 import { OAuthCallback } from './components/oauth-callback'
@@ -34,9 +35,11 @@ function AppContent() {
 function App() {
   return (
     <ToastProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <SettingsProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </SettingsProvider>
       <ToastContainer />
     </ToastProvider>
   )
