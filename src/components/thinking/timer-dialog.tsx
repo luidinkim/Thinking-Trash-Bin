@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog'
@@ -19,14 +19,12 @@ export function TimerDialog({ item, open, onOpenChange, onStart }: TimerDialogPr
   const { settings } = useSettings()
   const [minutes, setMinutes] = useState(settings.defaultTimer)
 
-  // Reset minutes to default when dialog opens (render-time state adjustment)
-  const [prevOpen, setPrevOpen] = useState(open)
-  if (open && !prevOpen) {
-    setMinutes(settings.defaultTimer)
-  }
-  if (prevOpen !== open) {
-    setPrevOpen(open)
-  }
+  // Reset minutes to default when dialog opens
+  useEffect(() => {
+    if (open) {
+      setMinutes(settings.defaultTimer) // eslint-disable-line react-hooks/set-state-in-effect -- intentional: sync local state with prop
+    }
+  }, [open, settings.defaultTimer])
 
   if (!item) return null
 

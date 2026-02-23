@@ -25,12 +25,10 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
     onExpireRef.current = onExpire
   }, [onExpire])
 
-  // Reset remaining seconds when duration changes (render-time state adjustment)
-  const [prevTotalSeconds, setPrevTotalSeconds] = useState(totalSeconds)
-  if (prevTotalSeconds !== totalSeconds) {
-    setPrevTotalSeconds(totalSeconds)
-    setRemainingSeconds(totalSeconds)
-  }
+  // Reset remaining seconds when duration changes
+  useEffect(() => {
+    setRemainingSeconds(durationMinutes * 60)
+  }, [durationMinutes])
 
   const stop = useCallback(() => {
     setIsRunning(false)

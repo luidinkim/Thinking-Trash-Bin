@@ -85,11 +85,10 @@ export function DetailPanel({
   const [newTag, setNewTag] = useState('')
 
   // Reset editing when selected item changes
-  const [prevItemId, setPrevItemId] = useState<string | null>(null)
-  if (selectedItem?.id !== prevItemId) {
-    setPrevItemId(selectedItem?.id ?? null)
-    if (editing) setEditing(false)
-  }
+  const selectedItemId = selectedItem?.id
+  useEffect(() => {
+    setEditing(false)
+  }, [selectedItemId])
 
   const startEditing = useCallback(() => {
     if (!selectedItem) return
