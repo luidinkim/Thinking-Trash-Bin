@@ -1,24 +1,67 @@
-import Markdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Brain } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/cn'
 import { useBin } from '../../contexts/bin-context'
-import type { BinItem, Priority } from '../../types/bin-item'
+import type { BinItem, BinItemStatus, Priority } from '../../types/bin-item'
 
 interface DetailPanelProps {
   onPromote?: (item: BinItem) => void
   onResolve?: (item: BinItem) => void
   onDrop?: (item: BinItem) => void
+  onStartThinking?: (item: BinItem) => void
 }
 
 const priorityLabels: Record<Priority, string> = {
-  S: 'S — 즉시 수정',
-  A: 'A — 다음 사이클',
-  B: 'B — 미래 개선',
+  S: 'S -- 즉시 수정',
+  A: 'A -- 다음 사이클',
+  B: 'B -- 미래 개선',
 }
 
-const priorityBadgeColors: Record<Priority, string> = {
-  S: 'bg-red-500/20 text-red-400 border-red-500/30',
-  A: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  B: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
+  S: 'priority_s',
+  A: 'priority_a',
+  B: 'priority_b',
+}
+
+const statusLabels: Record<BinItemStatus, string> = {
+  open: '열림',
+  promoted: '승격됨',
+  resolved: '해결됨',
+  dropped: '폐기됨',
+}
+
+const statusClasses: Record<BinItemStatus, string> = {
+  open: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  promoted: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+  resolved: 'bg-green-500/15 text-green-400 border-green-500/30',
+  dropped: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
+}
+
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSeconds = Math.floor(diffMs / 1000)
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  const diffHours = Math.floor(diffMinutes / 60)
+  const diffDays = Math.floor(diffHours / 24)
+
+  if (diffDays > 30) {
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+  if (diffDays > 0) return `${diffDays}일 전`
+  if (diffHours > 0) return `${diffHours}시간 전`
+  if (diffMinutes > 0) return `${diffMinutes}분 전`
+  return '방금 전'
 }
 
 function buildMarkdownBody(item: BinItem): string {
@@ -40,83 +83,115 @@ function buildMarkdownBody(item: BinItem): string {
   return sections.join('\n\n')
 }
 
-export function DetailPanel({ onPromote, onResolve, onDrop }: DetailPanelProps) {
+export function DetailPanel({
+  onPromote,
+  onResolve,
+  onDrop,
+  onStartThinking,
+}: DetailPanelProps) {
   const { selectedItem, scope } = useBin()
 
   if (!selectedItem) {
     return (
-      <div className="flex-1 h-full bg-gray-950 flex items-center justify-center">
-        <p className="text-gray-600 text-sm">항목을 선택하세요</p>
+      <div className="flex-1 h-full bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">항목을 선택하세요</p>
       </div>
     )
   }
 
   const body = buildMarkdownBody(selectedItem)
-  const createdDate = new Date(selectedItem.created).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const relativeDate = formatRelativeTime(selectedItem.created)
 
   return (
-    <div className="flex-1 h-full bg-gray-950 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-800">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-bold text-gray-100">{selectedItem.title}</h2>
-            <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded border ${priorityBadgeColors[selectedItem.priority]}`}
+    <div className="flex-1 h-full bg-background flex flex-col overflow-hidden">
+      {/* Meta info card */}
+      <div className="p-6 border-b border-border">
+        <h2 className="text-xl font-bold text-foreground">{selectedItem.title}</h2>
+
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <Badge variant={priorityVariant[selectedItem.priority]}>
+            {priorityLabels[selectedItem.priority]}
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn('text-xs', statusClasses[selectedItem.status])}
+          >
+            {statusLabels[selectedItem.status]}
+          </Badge>
+        </div>
+
+        {selectedItem.tags.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+            {selectedItem.tags.map(tag => (
+              <Badge
+                key={tag}
+                variant="secondary"
+                className="text-xs font-normal"
               >
-                {priorityLabels[selectedItem.priority]}
-              </span>
-              {selectedItem.tags.map(tag => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 text-xs bg-gray-800 text-gray-400 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-              <span>{selectedItem.author}</span>
-              <span>{createdDate}</span>
-            </div>
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <span>{selectedItem.author}</span>
+          <span>{relativeDate}</span>
+        </div>
+      </div>
+
+      {/* "생각하기" button */}
+      {onStartThinking && (
+        <>
+          <div className="px-6 py-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => onStartThinking(selectedItem)}
+            >
+              <Brain className="h-4 w-4" />
+              생각하기
+            </Button>
+          </div>
+          <Separator />
+        </>
+      )}
+
+      {/* Markdown body */}
+      <ScrollArea className="flex-1">
+        <div className="p-6">
+          <div className="prose prose-invert prose-sm max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
           </div>
         </div>
-      </div>
+      </ScrollArea>
 
-      {/* Body */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="prose prose-invert prose-sm max-w-none">
-          <Markdown remarkPlugins={[remarkGfm]}>{body}</Markdown>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="p-4 border-t border-gray-800 flex gap-2">
+      {/* Action bar */}
+      <div className="p-4 border-t border-border flex gap-2">
         {scope === 'personal' && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPromote?.(selectedItem)}
-            className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
           >
-            팀 승격
-          </button>
+            ↑ 승격
+          </Button>
         )}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onResolve?.(selectedItem)}
-          className="px-4 py-2 text-sm bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors"
         >
-          해결됨
-        </button>
-        <button
+          ✓ 해결
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
           onClick={() => onDrop?.(selectedItem)}
-          className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
         >
-          폐기
-        </button>
+          × 폐기
+        </Button>
       </div>
     </div>
   )
