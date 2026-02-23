@@ -15,22 +15,22 @@ const columns: ColumnConfig[] = [
   {
     priority: 'S',
     label: 'S — 즉시 수정',
-    borderColor: 'border-red-500',
-    bgColor: 'bg-red-500/5',
+    borderColor: 'border-destructive',
+    bgColor: 'bg-destructive/5',
     badgeVariant: 'priority_s',
   },
   {
     priority: 'A',
     label: 'A — 다음 사이클',
-    borderColor: 'border-yellow-500',
-    bgColor: 'bg-yellow-500/5',
+    borderColor: 'border-status-promoted',
+    bgColor: 'bg-status-promoted/5',
     badgeVariant: 'priority_a',
   },
   {
     priority: 'B',
     label: 'B — 미래 개선',
-    borderColor: 'border-blue-500',
-    bgColor: 'bg-blue-500/5',
+    borderColor: 'border-ring',
+    bgColor: 'bg-ring/5',
     badgeVariant: 'priority_b',
   },
 ]

@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './contexts/auth-context'
 import { BinProvider } from './contexts/bin-context'
 import { ThinkingProvider } from './contexts/thinking-context'
 import { Toaster } from 'sonner'
-import { SettingsProvider } from './contexts/settings-context'
+import { SettingsProvider, useSettings } from './contexts/settings-context'
 import { LoginPage } from './components/login-page'
 import { AppShell } from './components/layout/app-shell'
 import { OAuthCallback } from './components/oauth-callback'
@@ -34,13 +34,19 @@ function AppContent() {
   )
 }
 
+function ThemedToaster() {
+  const { settings } = useSettings()
+  const toasterTheme = settings.theme === 'system' ? 'system' : settings.theme
+  return <Toaster theme={toasterTheme} position="bottom-right" />
+}
+
 function App() {
   return (
     <SettingsProvider>
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-      <Toaster theme="dark" position="bottom-right" />
+      <ThemedToaster />
     </SettingsProvider>
   )
 }

@@ -25,6 +25,13 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
     onExpireRef.current = onExpire
   }, [onExpire])
 
+  // Reset remaining seconds when duration changes (render-time state adjustment)
+  const [prevTotalSeconds, setPrevTotalSeconds] = useState(totalSeconds)
+  if (prevTotalSeconds !== totalSeconds) {
+    setPrevTotalSeconds(totalSeconds)
+    setRemainingSeconds(totalSeconds)
+  }
+
   const stop = useCallback(() => {
     setIsRunning(false)
     if (intervalRef.current) {
@@ -34,6 +41,7 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
   }, [])
 
   const start = useCallback(() => {
+    setRemainingSeconds(totalSeconds)
     setIsRunning(true)
     intervalRef.current = setInterval(() => {
       setRemainingSeconds(prev => {
@@ -45,7 +53,7 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
         return prev - 1
       })
     }, 1000)
-  }, [stop])
+  }, [stop, totalSeconds])
 
   useEffect(() => {
     return () => {
@@ -53,7 +61,7 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
     }
   }, [])
 
-  const progress = Math.round((remainingSeconds / totalSeconds) * 100)
+  const progress = totalSeconds > 0 ? Math.round((remainingSeconds / totalSeconds) * 100) : 0
   const elapsedMinutes = Math.floor((totalSeconds - remainingSeconds) / 60)
   const mins = Math.floor(remainingSeconds / 60)
   const secs = remainingSeconds % 60

@@ -19,6 +19,15 @@ export function TimerDialog({ item, open, onOpenChange, onStart }: TimerDialogPr
   const { settings } = useSettings()
   const [minutes, setMinutes] = useState(settings.defaultTimer)
 
+  // Reset minutes to default when dialog opens (render-time state adjustment)
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open && !prevOpen) {
+    setMinutes(settings.defaultTimer)
+  }
+  if (prevOpen !== open) {
+    setPrevOpen(open)
+  }
+
   if (!item) return null
 
   return (

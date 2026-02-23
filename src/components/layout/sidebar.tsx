@@ -5,18 +5,13 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { SettingsSheet } from '@/components/settings/settings-sheet'
 import { cn } from '@/lib/cn'
+import { priorityVariant } from '@/lib/priority'
 import { useBin } from '@/contexts/bin-context'
 import { useAuth } from '@/contexts/auth-context'
 import type { Priority } from '@/types/bin-item'
 
 interface SidebarProps {
   onClose?: () => void
-}
-
-const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
-  S: 'priority_s',
-  A: 'priority_a',
-  B: 'priority_b',
 }
 
 export function Sidebar({ onClose }: SidebarProps) {

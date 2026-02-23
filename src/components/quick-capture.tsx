@@ -23,17 +23,17 @@ interface QuickCaptureProps {
 
 const PRIORITY_STYLES: Record<Priority, { active: string; label: string; badge: 'priority_s' | 'priority_a' | 'priority_b' }> = {
   S: {
-    active: 'border-red-500 bg-red-500/20 text-red-400',
+    active: 'border-destructive bg-destructive/20 text-destructive',
     label: 'S',
     badge: 'priority_s',
   },
   A: {
-    active: 'border-yellow-500 bg-yellow-500/20 text-yellow-400',
+    active: 'border-status-promoted bg-status-promoted/20 text-status-promoted',
     label: 'A',
     badge: 'priority_a',
   },
   B: {
-    active: 'border-blue-500 bg-blue-500/20 text-blue-400',
+    active: 'border-ring bg-ring/20 text-ring',
     label: 'B',
     badge: 'priority_b',
   },
@@ -154,19 +154,19 @@ export function QuickCapture({ open, onClose, onSave, availableTags }: QuickCapt
           {availableTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {availableTags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                  className={cn(
-                    'cursor-pointer transition-colors',
-                    selectedTags.includes(tag)
-                      ? 'border-primary bg-primary/20 text-primary'
-                      : 'border-border bg-secondary text-muted-foreground hover:text-foreground'
-                  )}
-                  onClick={() => toggleTag(tag)}
-                >
-                  {tag}
-                </Badge>
+                <button key={tag} onClick={() => toggleTag(tag)}>
+                  <Badge
+                    variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                    className={cn(
+                      'cursor-pointer transition-colors',
+                      selectedTags.includes(tag)
+                        ? 'border-primary bg-primary/20 text-primary'
+                        : 'border-border bg-secondary text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {tag}
+                  </Badge>
+                </button>
               ))}
             </div>
           )}

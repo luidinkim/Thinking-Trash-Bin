@@ -21,10 +21,41 @@
   --color-card-foreground: oklch(0.985 0 0);
   --color-popover: oklch(0.141 0.005 285.823);
   --color-popover-foreground: oklch(0.985 0 0);
+  --color-status-open: oklch(0.648 0.143 164.978);
+  --color-status-promoted: oklch(0.585 0.199 261.326);
+  --color-status-resolved: oklch(0.648 0.2 142.495);
+  --color-status-dropped: oklch(0.552 0.016 286.286);
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
+}
+
+/* Light theme overrides */
+.light {
+  --color-border: oklch(0.885 0.006 286.033);
+  --color-input: oklch(0.885 0.006 286.033);
+  --color-ring: oklch(0.551 0.027 264.364);
+  --color-background: oklch(0.985 0 0);
+  --color-foreground: oklch(0.141 0.005 285.823);
+  --color-primary: oklch(0.205 0.006 285.885);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.945 0.006 286.033);
+  --color-secondary-foreground: oklch(0.205 0.006 285.885);
+  --color-destructive: oklch(0.554 0.191 29.234);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-muted: oklch(0.945 0.006 286.033);
+  --color-muted-foreground: oklch(0.442 0.017 286.286);
+  --color-accent: oklch(0.945 0.006 286.033);
+  --color-accent-foreground: oklch(0.205 0.006 285.885);
+  --color-card: oklch(0.985 0 0);
+  --color-card-foreground: oklch(0.141 0.005 285.823);
+  --color-popover: oklch(0.985 0 0);
+  --color-popover-foreground: oklch(0.141 0.005 285.823);
+  --color-status-open: oklch(0.531 0.176 164.978);
+  --color-status-promoted: oklch(0.474 0.219 261.326);
+  --color-status-resolved: oklch(0.531 0.233 142.495);
+  --color-status-dropped: oklch(0.442 0.017 286.286);
 }
 
 @keyframes slide-up {
@@ -39,5 +70,5 @@
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+::-webkit-scrollbar-thumb { background: var(--color-muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }

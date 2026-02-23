@@ -6,39 +6,20 @@ import { Button } from '@/components/ui/button'
 import { useThinking } from '@/contexts/thinking-context'
 import { useSettings } from '@/contexts/settings-context'
 import { useTimer } from '@/hooks/use-timer'
+import { priorityVariant, priorityLabels } from '@/lib/priority'
+import { buildMarkdownBody } from '@/lib/markdown-render'
 import { TimerBar } from './timer-bar'
 import { ThinkingMemo } from './thinking-memo'
 import { ModeFullscreen } from './mode-fullscreen'
 import { ModeOverlay } from './mode-overlay'
 import { ModeSplit } from './mode-split'
-import type { BinItem, Priority } from '@/types/bin-item'
+import type { BinItem } from '@/types/bin-item'
 
 interface ThinkingSessionProps {
   onSave: (item: BinItem, memo: string, elapsedMinutes: number) => Promise<void>
   onPromote: (item: BinItem) => Promise<void>
   onResolve: (item: BinItem) => Promise<void>
   onDrop: (item: BinItem) => Promise<void>
-}
-
-const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
-  S: 'priority_s',
-  A: 'priority_a',
-  B: 'priority_b',
-}
-
-const priorityLabels: Record<Priority, string> = {
-  S: 'S -- 즉시 수정',
-  A: 'A -- 다음 사이클',
-  B: 'B -- 미래 개선',
-}
-
-function buildMarkdownBody(item: BinItem): string {
-  const sections: string[] = []
-  if (item.problem) sections.push(`## 문제 상황\n\n${item.problem}`)
-  if (item.currentStructure) sections.push(`## 현재 구조\n\n${item.currentStructure}`)
-  if (item.idea) sections.push(`## 개선 아이디어\n\n${item.idea}`)
-  if (item.impact) sections.push(`## 영향 범위\n\n${item.impact}`)
-  return sections.join('\n\n')
 }
 
 export function ThinkingSession({ onSave, onPromote, onResolve, onDrop }: ThinkingSessionProps) {
@@ -129,6 +110,10 @@ export function ThinkingSession({ onSave, onPromote, onResolve, onDrop }: Thinki
   }, [session, memo, timer, onSave, onDrop, endSession])
 
   const handleStop = useCallback(() => {
+    if (memoRef.current.trim()) {
+      const confirmed = window.confirm('작성 중인 메모가 있습니다. 저장하지 않고 종료하시겠습니까?')
+      if (!confirmed) return
+    }
     timer.stop()
     endSession()
   }, [timer, endSession])
@@ -159,7 +144,7 @@ export function ThinkingSession({ onSave, onPromote, onResolve, onDrop }: Thinki
           </Badge>
         ))}
       </div>
-      <div className="prose prose-invert prose-sm max-w-none">
+      <div className="prose prose-invert prose-sm max-w-none dark:prose-invert">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
       </div>
     </div>

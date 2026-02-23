@@ -78,4 +78,14 @@ describe('useTimer', () => {
     act(() => { vi.advanceTimersByTime(5000) })
     expect(result.current.formattedTime).toBe('00:55')
   })
+
+  it('resets remaining seconds when durationMinutes changes', () => {
+    let duration = 1
+    const { result, rerender } = renderHook(() => useTimer({ durationMinutes: duration, onExpire: vi.fn() }))
+    expect(result.current.remainingSeconds).toBe(60)
+
+    duration = 2
+    rerender()
+    expect(result.current.remainingSeconds).toBe(120)
+  })
 })

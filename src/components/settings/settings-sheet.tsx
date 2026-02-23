@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useSettings } from '@/contexts/settings-context'
-import type { ThinkingMode, ListDensity } from '@/types/settings'
+import type { ThinkingMode, ThemeMode, ListDensity } from '@/types/settings'
 
 interface SettingsSheetProps {
   open: boolean
@@ -28,8 +28,14 @@ const LIST_DENSITIES: { value: ListDensity; label: string }[] = [
   { value: 'comfortable', label: 'Comfortable' },
 ]
 
+const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
+  { value: 'dark', label: 'Dark' },
+  { value: 'light', label: 'Light' },
+  { value: 'system', label: 'System' },
+]
+
 export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
-  const { settings, setThinkingMode, setDefaultTimer, setListDensity } = useSettings()
+  const { settings, setThinkingMode, setDefaultTimer, setListDensity, setTheme } = useSettings()
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -40,6 +46,28 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
+          {/* Theme */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-foreground">Theme</h4>
+            <p className="text-xs text-muted-foreground">
+              Choose the appearance of the app.
+            </p>
+            <div className="flex gap-2">
+              {THEME_OPTIONS.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={settings.theme === value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme(value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Thinking Mode */}
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-foreground">Thinking Mode</h4>

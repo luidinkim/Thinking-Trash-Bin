@@ -1,13 +1,9 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/cn'
+import { priorityVariant } from '@/lib/priority'
+import { formatRelativeTime } from '@/lib/date-utils'
 import { useSettings } from '@/contexts/settings-context'
-import type { BinItem, Priority } from '@/types/bin-item'
-
-const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
-  S: 'priority_s',
-  A: 'priority_a',
-  B: 'priority_b',
-}
+import type { BinItem } from '@/types/bin-item'
 
 /**
  * Get the first non-empty preview text from the item's body sections.
@@ -18,36 +14,12 @@ function getPreviewText(item: BinItem): string {
 
 /**
  * Count thinking sessions by matching `### YYYY-MM-DD` heading patterns
- * in the combined body text. This is a temporary approach until the
- * thinkingNotes field is added in Task 8.
+ * in the thinkingNotes field.
  */
 function countThinkingSessions(item: BinItem): number {
-  const body = [item.problem, item.currentStructure, item.idea, item.impact]
-    .filter(Boolean)
-    .join('\n')
-  const matches = body.match(/^### \d{4}-\d{2}-\d{2}/gm)
+  if (!item.thinkingNotes) return 0
+  const matches = item.thinkingNotes.match(/^### \d{4}-\d{2}-\d{2}/gm)
   return matches ? matches.length : 0
-}
-
-/**
- * Format a date string as Korean relative time.
- */
-function relativeTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  if (diffMinutes < 1) return '방금 전'
-  if (diffMinutes < 60) return `${diffMinutes}분 전`
-
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  if (diffHours < 24) return `${diffHours}시간 전`
-
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  if (diffDays < 30) return `${diffDays}일 전`
-
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
 }
 
 interface ItemCardProps {
@@ -108,7 +80,7 @@ export function ItemCard({ item, selected, onClick }: ItemCardProps) {
         {/* Thinking count badge */}
         {thinkingCount > 0 && (
           <Badge variant="outline" className="px-1.5 py-0 text-[10px] leading-4 shrink-0 text-muted-foreground">
-            {`\uC0DD\uAC01 ${thinkingCount}\uD68C`}
+            {`생각 ${thinkingCount}회`}
           </Badge>
         )}
 
@@ -118,7 +90,7 @@ export function ItemCard({ item, selected, onClick }: ItemCardProps) {
         {/* Relative time (comfortable mode only) */}
         {isComfortable && (
           <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-            {relativeTime(item.created)}
+            {formatRelativeTime(item.created)}
           </span>
         )}
       </div>

@@ -15,6 +15,11 @@ function loadSettings(): Settings {
   }
 }
 
+function getEffectiveTheme(theme: ThemeMode): 'dark' | 'light' {
+  if (theme !== 'system') return theme
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 interface SettingsContextType {
   settings: Settings
   setThinkingMode: (mode: ThinkingMode) => void
@@ -31,6 +36,25 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
   }, [settings])
+
+  // Apply theme class to document root
+  useEffect(() => {
+    const root = document.documentElement
+    const effective = getEffectiveTheme(settings.theme)
+    root.classList.remove('dark', 'light')
+    root.classList.add(effective)
+
+    // Listen for system theme changes when mode is 'system'
+    if (settings.theme === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)')
+      const handler = (e: MediaQueryListEvent) => {
+        root.classList.remove('dark', 'light')
+        root.classList.add(e.matches ? 'dark' : 'light')
+      }
+      mq.addEventListener('change', handler)
+      return () => mq.removeEventListener('change', handler)
+    }
+  }, [settings.theme])
 
   const update = useCallback((patch: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...patch }))

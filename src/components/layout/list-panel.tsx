@@ -3,13 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ItemCard } from '@/components/item-card'
 import { cn } from '@/lib/cn'
+import { priorityVariant } from '@/lib/priority'
 import type { Priority } from '@/types/bin-item'
-
-const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
-  S: 'priority_s',
-  A: 'priority_a',
-  B: 'priority_b',
-}
 
 export function ListPanel() {
   const {

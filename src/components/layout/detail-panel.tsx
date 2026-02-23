@@ -6,26 +6,17 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/cn'
+import { priorityVariant, priorityLabels } from '@/lib/priority'
+import { formatRelativeTime } from '@/lib/date-utils'
+import { buildMarkdownBody } from '@/lib/markdown-render'
 import { useBin } from '../../contexts/bin-context'
-import type { BinItem, BinItemStatus, Priority } from '../../types/bin-item'
+import type { BinItem, BinItemStatus } from '../../types/bin-item'
 
 interface DetailPanelProps {
   onPromote?: (item: BinItem) => void
   onResolve?: (item: BinItem) => void
   onDrop?: (item: BinItem) => void
   onStartThinking?: (item: BinItem) => void
-}
-
-const priorityLabels: Record<Priority, string> = {
-  S: 'S -- 즉시 수정',
-  A: 'A -- 다음 사이클',
-  B: 'B -- 미래 개선',
-}
-
-const priorityVariant: Record<Priority, 'priority_s' | 'priority_a' | 'priority_b'> = {
-  S: 'priority_s',
-  A: 'priority_a',
-  B: 'priority_b',
 }
 
 const statusLabels: Record<BinItemStatus, string> = {
@@ -36,51 +27,10 @@ const statusLabels: Record<BinItemStatus, string> = {
 }
 
 const statusClasses: Record<BinItemStatus, string> = {
-  open: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  promoted: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
-  resolved: 'bg-green-500/15 text-green-400 border-green-500/30',
-  dropped: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
-}
-
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffDays > 30) {
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
-  if (diffDays > 0) return `${diffDays}일 전`
-  if (diffHours > 0) return `${diffHours}시간 전`
-  if (diffMinutes > 0) return `${diffMinutes}분 전`
-  return '방금 전'
-}
-
-function buildMarkdownBody(item: BinItem): string {
-  const sections: string[] = []
-
-  if (item.problem) {
-    sections.push(`## 문제 상황\n\n${item.problem}`)
-  }
-  if (item.currentStructure) {
-    sections.push(`## 현재 구조\n\n${item.currentStructure}`)
-  }
-  if (item.idea) {
-    sections.push(`## 개선 아이디어\n\n${item.idea}`)
-  }
-  if (item.impact) {
-    sections.push(`## 영향 범위\n\n${item.impact}`)
-  }
-
-  return sections.join('\n\n')
+  open: 'bg-status-open/15 text-status-open border-status-open/30',
+  promoted: 'bg-status-promoted/15 text-status-promoted border-status-promoted/30',
+  resolved: 'bg-status-resolved/15 text-status-resolved border-status-resolved/30',
+  dropped: 'bg-status-dropped/15 text-status-dropped border-status-dropped/30',
 }
 
 export function DetailPanel({
@@ -161,7 +111,7 @@ export function DetailPanel({
       {/* Markdown body */}
       <ScrollArea className="flex-1">
         <div className="p-6">
-          <div className="prose prose-invert prose-sm max-w-none">
+          <div className="prose prose-invert prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
           </div>
         </div>
