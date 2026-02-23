@@ -1,4 +1,13 @@
 import { useState } from 'react'
+import {
+  Group as PanelGroup,
+  Panel,
+  Separator as PanelResizeHandle,
+} from 'react-resizable-panels'
+import { Menu, Plus, List, Columns3 } from 'lucide-react'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 import { Sidebar } from './sidebar'
 import { ListPanel } from './list-panel'
 import { DetailPanel } from './detail-panel'
@@ -54,69 +63,127 @@ export function AppShell() {
   }
 
   return (
-    <div className="h-screen flex flex-col lg:flex-row bg-gray-950 text-gray-100">
+    <div className="h-screen flex flex-col bg-background text-foreground">
       {/* Mobile header */}
-      <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-800 bg-gray-900">
-        <button
+      <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
           onClick={() => setSidebarOpen(true)}
-          className="text-gray-400 hover:text-gray-200"
           aria-label="Open menu"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <span className="text-lg font-bold">ThinkBin</span>
-      </div>
-
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/50"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar - desktop: always visible; mobile: slide from left */}
-      <div
-        className={`
-          fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out
-          lg:relative lg:translate-x-0 lg:z-auto
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <Sidebar onClose={() => setSidebarOpen(false)} />
-      </div>
-
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        {/* View toggle toolbar */}
-        <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/50">
-          <button
+          <Menu className="h-5 w-5" />
+        </Button>
+        <span className="text-lg font-bold text-foreground">ThinkBin</span>
+        <div className="flex-1" />
+        {/* Mobile view toggle + capture */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+            size="icon"
+            className="h-8 w-8"
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              viewMode === 'list'
-                ? 'bg-gray-700 text-gray-100'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
+            aria-label="List view"
           >
-            List
-          </button>
-          <button
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+            size="icon"
+            className="h-8 w-8"
             onClick={() => setViewMode('kanban')}
-            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              viewMode === 'kanban'
-                ? 'bg-gray-700 text-gray-100'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
+            aria-label="Kanban view"
           >
-            Kanban
-          </button>
+            <Columns3 className="h-4 w-4" />
+          </Button>
         </div>
+      </div>
 
-        {/* View content */}
+      {/* Mobile sidebar sheet */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-56">
+          <Sidebar onClose={() => setSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop layout */}
+      <div className="hidden lg:flex flex-1 overflow-hidden">
+        <PanelGroup orientation="horizontal" className="h-full">
+          {/* Sidebar panel */}
+          <Panel defaultSize={15} minSize={10} maxSize={25}>
+            <Sidebar />
+          </Panel>
+
+          <PanelResizeHandle className="w-px bg-border hover:bg-primary/50 transition-colors" />
+
+          {/* Main content panel */}
+          <Panel defaultSize={85} minSize={50}>
+            <div className="h-full flex flex-col overflow-hidden">
+              {/* View toggle toolbar */}
+              <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-card/50">
+                <Button
+                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={cn(
+                    'gap-1.5',
+                    viewMode !== 'list' && 'text-muted-foreground',
+                  )}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-3.5 w-3.5" />
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={cn(
+                    'gap-1.5',
+                    viewMode !== 'kanban' && 'text-muted-foreground',
+                  )}
+                  onClick={() => setViewMode('kanban')}
+                >
+                  <Columns3 className="h-3.5 w-3.5" />
+                  Kanban
+                </Button>
+                <div className="flex-1" />
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setCaptureOpen(true)}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Capture
+                </Button>
+              </div>
+
+              {/* View content */}
+              {viewMode === 'list' ? (
+                <PanelGroup orientation="horizontal" className="flex-1 min-h-0">
+                  <Panel defaultSize={35} minSize={20}>
+                    <ListPanel />
+                  </Panel>
+                  <PanelResizeHandle className="w-px bg-border hover:bg-primary/50 transition-colors" />
+                  <Panel defaultSize={65}>
+                    <DetailPanel
+                      onPromote={(item) => handlePromote(item)}
+                      onResolve={(item) => handleResolve(item)}
+                      onDrop={(item) => handleDrop(item)}
+                    />
+                  </Panel>
+                </PanelGroup>
+              ) : (
+                <KanbanView />
+              )}
+            </div>
+          </Panel>
+        </PanelGroup>
+      </div>
+
+      {/* Mobile content */}
+      <div className="lg:hidden flex-1 flex flex-col overflow-hidden min-h-0">
         {viewMode === 'list' ? (
-          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             <ListPanel />
             <DetailPanel
               onPromote={(item) => handlePromote(item)}
@@ -129,14 +196,15 @@ export function AppShell() {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <button
+      {/* Floating Action Button (mobile) */}
+      <Button
+        size="icon"
+        className="lg:hidden fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-lg"
         onClick={() => setCaptureOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-2xl font-bold shadow-lg flex items-center justify-center transition-colors"
         aria-label="Quick Capture"
       >
-        +
-      </button>
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {/* Quick Capture modal */}
       <QuickCapture
