@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Priority } from '../types/bin-item'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/cn'
 
 export interface QuickCaptureData {
   title: string
@@ -18,18 +21,21 @@ interface QuickCaptureProps {
   availableTags: string[]
 }
 
-const PRIORITY_STYLES: Record<Priority, { active: string; label: string }> = {
+const PRIORITY_STYLES: Record<Priority, { active: string; label: string; badge: 'priority_s' | 'priority_a' | 'priority_b' }> = {
   S: {
     active: 'border-red-500 bg-red-500/20 text-red-400',
     label: 'S',
+    badge: 'priority_s',
   },
   A: {
     active: 'border-yellow-500 bg-yellow-500/20 text-yellow-400',
     label: 'A',
+    badge: 'priority_a',
   },
   B: {
     active: 'border-blue-500 bg-blue-500/20 text-blue-400',
     label: 'B',
+    badge: 'priority_b',
   },
 }
 
@@ -94,23 +100,24 @@ export function QuickCapture({ open, onClose, onSave, availableTags }: QuickCapt
 
       {/* Bottom sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 rounded-t-2xl max-h-[80vh] overflow-y-auto animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl max-h-[80vh] overflow-y-auto animate-slide-up"
         role="dialog"
         aria-label="Quick Capture"
       >
         <div className="p-4 space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-100">Quick Capture</h2>
-            <button
+            <h2 className="text-lg font-bold text-foreground">Quick Capture</h2>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-200"
               aria-label="Close"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
           </div>
 
           {/* Title input */}
@@ -120,23 +127,26 @@ export function QuickCapture({ open, onClose, onSave, availableTags }: QuickCapt
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요..."
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary"
           />
 
           {/* Priority selector */}
           <div className="flex gap-2">
             {(Object.keys(PRIORITY_STYLES) as Priority[]).map((p) => (
-              <button
+              <Button
                 key={p}
+                variant="outline"
+                size="sm"
                 onClick={() => setPriority(p)}
-                className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                className={cn(
+                  'transition-colors',
                   priority === p
                     ? PRIORITY_STYLES[p].active
-                    : 'border-gray-700 bg-gray-800 text-gray-400 hover:text-gray-200'
-                }`}
+                    : 'border-border bg-secondary text-muted-foreground hover:text-foreground'
+                )}
               >
                 {PRIORITY_STYLES[p].label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -144,79 +154,84 @@ export function QuickCapture({ open, onClose, onSave, availableTags }: QuickCapt
           {availableTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {availableTags.map((tag) => (
-                <button
+                <Badge
                   key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                  className={cn(
+                    'cursor-pointer transition-colors',
                     selectedTags.includes(tag)
-                      ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
-                      : 'border-gray-700 bg-gray-800 text-gray-400 hover:text-gray-200'
-                  }`}
+                      ? 'border-primary bg-primary/20 text-primary'
+                      : 'border-border bg-secondary text-muted-foreground hover:text-foreground'
+                  )}
+                  onClick={() => toggleTag(tag)}
                 >
                   {tag}
-                </button>
+                </Badge>
               ))}
             </div>
           )}
 
           {/* Expand button */}
-          <button
+          <Button
+            variant="link"
+            size="sm"
             onClick={() => setExpanded((prev) => !prev)}
-            className="text-sm text-indigo-400 hover:text-indigo-300"
+            className="px-0 text-primary"
           >
             {expanded ? '상세 필드 접기' : '상세 필드 펼치기'}
-          </button>
+          </Button>
 
           {/* Expanded detail fields */}
           {expanded && (
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">문제 상황</label>
+                <label className="block text-xs text-muted-foreground mb-1">문제 상황</label>
                 <textarea
                   value={problem}
                   onChange={(e) => setProblem(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">현재 구조</label>
+                <label className="block text-xs text-muted-foreground mb-1">현재 구조</label>
                 <textarea
                   value={currentStructure}
                   onChange={(e) => setCurrentStructure(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">개선 아이디어</label>
+                <label className="block text-xs text-muted-foreground mb-1">개선 아이디어</label>
                 <textarea
                   value={idea}
                   onChange={(e) => setIdea(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">영향 범위</label>
+                <label className="block text-xs text-muted-foreground mb-1">영향 범위</label>
                 <textarea
                   value={impact}
                   onChange={(e) => setImpact(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
                 />
               </div>
             </div>
           )}
 
           {/* Save button */}
-          <button
+          <Button
             onClick={handleSave}
             disabled={title.trim() === ''}
-            className="w-full py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-full"
+            size="lg"
           >
             저장하고 계속 작업
-          </button>
+          </Button>
         </div>
       </div>
     </>
