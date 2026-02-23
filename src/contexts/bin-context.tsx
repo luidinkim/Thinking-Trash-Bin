@@ -33,7 +33,11 @@ export function BinProvider({ children }: { children: ReactNode }) {
   const togglePriorityFilter = useCallback((p: string) => {
     setPriorityFilter(prev => {
       const next = new Set(prev)
-      next.has(p) ? next.delete(p) : next.add(p)
+      if (next.has(p)) {
+        next.delete(p)
+      } else {
+        next.add(p)
+      }
       return next
     })
   }, [])
@@ -41,7 +45,11 @@ export function BinProvider({ children }: { children: ReactNode }) {
   const toggleTagFilter = useCallback((t: string) => {
     setTagFilter(prev => {
       const next = new Set(prev)
-      next.has(t) ? next.delete(t) : next.add(t)
+      if (next.has(t)) {
+        next.delete(t)
+      } else {
+        next.add(t)
+      }
       return next
     })
   }, [])

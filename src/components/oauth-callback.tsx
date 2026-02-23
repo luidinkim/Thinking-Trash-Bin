@@ -29,8 +29,8 @@ export function OAuthCallback({ onComplete }: { onComplete: () => void }) {
   }, [handleCallback, onComplete])
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-gray-400">로그인 처리 중...</p>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground">로그인 처리 중...</p>
     </div>
   )
 }

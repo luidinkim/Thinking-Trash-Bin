@@ -21,7 +21,9 @@ export function useTimer({ durationMinutes, onExpire }: UseTimerOptions): UseTim
   const [isRunning, setIsRunning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const onExpireRef = useRef(onExpire)
-  onExpireRef.current = onExpire
+  useEffect(() => {
+    onExpireRef.current = onExpire
+  }, [onExpire])
 
   const stop = useCallback(() => {
     setIsRunning(false)

@@ -65,15 +65,17 @@ export function ThinkingSession({ onSave, onPromote, onResolve, onDrop }: Thinki
     onExpire: handleExpire,
   })
 
+  const { start: timerStart } = timer
+
   // Start timer when session becomes active
   const prevSessionRef = useRef<typeof session>(null)
   useEffect(() => {
     if (session && session !== prevSessionRef.current) {
       setMemo('')
-      timer.start()
+      timerStart()
     }
     prevSessionRef.current = session
-  }, [session, timer.start])
+  }, [session, timerStart])
 
   const handleSaveAndEnd = useCallback(async () => {
     if (!session) return
