@@ -78,6 +78,7 @@ describe('serializeBinItem', () => {
       currentStructure: '현재 구조 설명',
       idea: '개선 아이디어 설명',
       impact: '영향 범위 설명',
+      thinkingNotes: '',
       filePath: '',
       sha: '',
     }
@@ -88,5 +89,71 @@ describe('serializeBinItem', () => {
     expect(md).toContain('## 문제 상황')
     expect(md).toContain('문제 설명')
     expect(md).toContain('## 개선 아이디어')
+  })
+})
+
+describe('thinking notes parsing', () => {
+  it('parses thinking notes section from markdown', () => {
+    const md = `---
+id: "t1"
+title: "테스트"
+priority: "A"
+tags: []
+author: "dev"
+created: "2026-02-23T10:00:00+09:00"
+status: "open"
+promoted_at: null
+---
+
+## 문제 상황
+문제 설명
+
+## 생각 노트
+### 2026-02-23 14:30 (32분)
+- 메모 내용 A
+
+### 2026-02-23 10:15 (15분)
+- 메모 내용 B`
+
+    const item = parseBinItem(md, 'path.md', 'sha')
+    expect(item.thinkingNotes).toContain('### 2026-02-23 14:30 (32분)')
+    expect(item.thinkingNotes).toContain('메모 내용 A')
+    expect(item.thinkingNotes).toContain('메모 내용 B')
+  })
+
+  it('returns empty string when no thinking notes exist', () => {
+    const item = parseBinItem(SAMPLE_MARKDOWN, 'path.md', 'sha')
+    expect(item.thinkingNotes).toBe('')
+  })
+})
+
+describe('thinking notes serialization', () => {
+  it('includes thinking notes section in serialized markdown', () => {
+    const item: BinItem = {
+      id: 't1', title: '테스트', priority: 'A', tags: [],
+      author: 'dev', created: '2026-02-23T10:00:00+09:00',
+      status: 'open', promoted_at: null,
+      problem: '문제', currentStructure: '', idea: '', impact: '',
+      thinkingNotes: '### 2026-02-23 14:30 (32분)\n- 메모 내용',
+      filePath: '', sha: '',
+    }
+
+    const md = serializeBinItem(item)
+    expect(md).toContain('## 생각 노트')
+    expect(md).toContain('### 2026-02-23 14:30 (32분)')
+  })
+
+  it('omits thinking notes section when empty', () => {
+    const item: BinItem = {
+      id: 't1', title: '테스트', priority: 'A', tags: [],
+      author: 'dev', created: '2026-02-23T10:00:00+09:00',
+      status: 'open', promoted_at: null,
+      problem: '문제', currentStructure: '', idea: '', impact: '',
+      thinkingNotes: '',
+      filePath: '', sha: '',
+    }
+
+    const md = serializeBinItem(item)
+    expect(md).not.toContain('## 생각 노트')
   })
 })

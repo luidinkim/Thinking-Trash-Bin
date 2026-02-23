@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
 import { AuthProvider, useAuth } from './contexts/auth-context'
 import { BinProvider } from './contexts/bin-context'
-import { ToastProvider } from './contexts/toast-context'
+import { ThinkingProvider } from './contexts/thinking-context'
+import { Toaster } from 'sonner'
+import { SettingsProvider } from './contexts/settings-context'
 import { LoginPage } from './components/login-page'
 import { AppShell } from './components/layout/app-shell'
 import { OAuthCallback } from './components/oauth-callback'
-import { ToastContainer } from './components/toast'
 
 function AppContent() {
   const { user, loading } = useAuth()
@@ -16,8 +17,8 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     )
   }
@@ -26,19 +27,21 @@ function AppContent() {
 
   return (
     <BinProvider>
-      <AppShell />
+      <ThinkingProvider>
+        <AppShell />
+      </ThinkingProvider>
     </BinProvider>
   )
 }
 
 function App() {
   return (
-    <ToastProvider>
+    <SettingsProvider>
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-      <ToastContainer />
-    </ToastProvider>
+      <Toaster theme="dark" position="bottom-right" />
+    </SettingsProvider>
   )
 }
 

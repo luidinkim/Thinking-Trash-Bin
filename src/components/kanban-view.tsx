@@ -1,12 +1,14 @@
 import { useBin } from '../contexts/bin-context'
 import type { BinItem, Priority } from '../types/bin-item'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ColumnConfig {
   priority: Priority
   label: string
   borderColor: string
   bgColor: string
-  badgeColor: string
+  badgeVariant: 'priority_s' | 'priority_a' | 'priority_b'
 }
 
 const columns: ColumnConfig[] = [
@@ -15,21 +17,21 @@ const columns: ColumnConfig[] = [
     label: 'S — 즉시 수정',
     borderColor: 'border-red-500',
     bgColor: 'bg-red-500/5',
-    badgeColor: 'bg-red-500/20 text-red-400',
+    badgeVariant: 'priority_s',
   },
   {
     priority: 'A',
     label: 'A — 다음 사이클',
     borderColor: 'border-yellow-500',
     bgColor: 'bg-yellow-500/5',
-    badgeColor: 'bg-yellow-500/20 text-yellow-400',
+    badgeVariant: 'priority_a',
   },
   {
     priority: 'B',
     label: 'B — 미래 개선',
     borderColor: 'border-blue-500',
     bgColor: 'bg-blue-500/5',
-    badgeColor: 'bg-blue-500/20 text-blue-400',
+    badgeVariant: 'priority_b',
   },
 ]
 
@@ -37,18 +39,19 @@ function KanbanCard({ item, onSelect }: { item: BinItem; onSelect: () => void })
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left bg-gray-800 rounded-lg border border-gray-700 p-3 hover:border-gray-600 transition-colors"
+      className="w-full text-left bg-secondary rounded-lg border border-border p-3 hover:border-accent transition-colors"
     >
-      <p className="text-sm text-gray-100 line-clamp-2">{item.title}</p>
+      <p className="text-sm text-foreground line-clamp-2">{item.title}</p>
       {item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {item.tags.slice(0, 3).map(tag => (
-            <span
+            <Badge
               key={tag}
-              className="px-1.5 py-0.5 text-xs bg-gray-700 text-gray-400 rounded"
+              variant="secondary"
+              className="text-xs text-muted-foreground"
             >
               {tag}
-            </span>
+            </Badge>
           ))}
         </div>
       )}
@@ -67,26 +70,28 @@ function KanbanColumn({ config, items, onSelectItem }: {
     >
       {/* Column header */}
       <div className="px-3 py-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-200">{config.label}</h3>
-        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${config.badgeColor}`}>
+        <h3 className="text-sm font-semibold text-foreground">{config.label}</h3>
+        <Badge variant={config.badgeVariant}>
           {items.length}
-        </span>
+        </Badge>
       </div>
 
       {/* Cards */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2">
-        {items.length === 0 ? (
-          <p className="text-xs text-gray-600 text-center py-4">항목 없음</p>
-        ) : (
-          items.map(item => (
-            <KanbanCard
-              key={item.id}
-              item={item}
-              onSelect={() => onSelectItem(item)}
-            />
-          ))
-        )}
-      </div>
+      <ScrollArea className="flex-1 px-3 pb-3">
+        <div className="space-y-2">
+          {items.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">항목 없음</p>
+          ) : (
+            items.map(item => (
+              <KanbanCard
+                key={item.id}
+                item={item}
+                onSelect={() => onSelectItem(item)}
+              />
+            ))
+          )}
+        </div>
+      </ScrollArea>
     </div>
   )
 }
