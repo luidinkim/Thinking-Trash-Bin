@@ -24,14 +24,20 @@ export function useBinItems() {
         ? `bins/personal/${user.login}`
         : 'bins/team'
       const fetched = await github.listItems(dirPath)
-      setItems(fetched.sort((a, b) => b.created.localeCompare(a.created)))
+      const sorted = fetched.sort((a, b) => b.created.localeCompare(a.created))
+      setItems(sorted)
+      // Sync selectedItem with latest data (e.g., after edit or thinking memo save)
+      setSelectedItem(prev => {
+        if (!prev) return null
+        return sorted.find(i => i.id === prev.id) ?? null
+      })
     } catch (err) {
       console.error('Failed to fetch items:', err)
       setItems([])
     } finally {
       setLoading(false)
     }
-  }, [github, user, scope, setItems, setLoading])
+  }, [github, user, scope, setItems, setSelectedItem, setLoading])
 
   useEffect(() => {
     fetchItems()
