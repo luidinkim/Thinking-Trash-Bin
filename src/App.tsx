@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { AuthProvider, useAuth } from './contexts/auth-context'
 import { BinProvider } from './contexts/bin-context'
+import { ThinkingProvider } from './contexts/thinking-context'
 import { ToastProvider } from './contexts/toast-context'
 import { SettingsProvider } from './contexts/settings-context'
 import { LoginPage } from './components/login-page'
@@ -27,7 +28,9 @@ function AppContent() {
 
   return (
     <BinProvider>
-      <AppShell />
+      <ThinkingProvider>
+        <AppShell />
+      </ThinkingProvider>
     </BinProvider>
   )
 }
