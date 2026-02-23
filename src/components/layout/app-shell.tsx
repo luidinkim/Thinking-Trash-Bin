@@ -67,6 +67,15 @@ export function AppShell() {
     }
   }
 
+  const handleEdit = async (item: BinItem, patch: Partial<BinItem>) => {
+    try {
+      await updateItemContent(item, patch)
+      toast.success('수정되었습니다')
+    } catch {
+      toast.error('수정에 실패했습니다')
+    }
+  }
+
   const handleStartThinking = (item: BinItem) => {
     setThinkingItem(item)
     setTimerDialogOpen(true)
@@ -141,19 +150,13 @@ export function AppShell() {
 
       {/* Desktop layout */}
       <div className="hidden lg:flex flex-1 overflow-hidden">
-        <PanelGroup orientation="horizontal" className="h-full">
-          {/* Sidebar panel */}
-          <Panel defaultSize={15} minSize={10} maxSize={25}>
-            <Sidebar />
-          </Panel>
+        {/* Fixed sidebar */}
+        <Sidebar />
 
-          <PanelResizeHandle className="w-px bg-border hover:bg-primary/50 transition-colors" />
-
-          {/* Main content panel */}
-          <Panel defaultSize={85} minSize={50}>
-            <div className="h-full flex flex-col overflow-hidden">
-              {/* View toggle toolbar */}
-              <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-card/50">
+        {/* Main content */}
+        <div className="flex-1 h-full flex flex-col overflow-hidden min-w-0">
+          {/* View toggle toolbar */}
+          <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-card/50">
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="sm"
@@ -202,15 +205,14 @@ export function AppShell() {
                       onResolve={(item) => handleResolve(item)}
                       onDrop={(item) => handleDrop(item)}
                       onStartThinking={(item) => handleStartThinking(item)}
+                      onEdit={handleEdit}
                     />
                   </Panel>
                 </PanelGroup>
               ) : (
                 <KanbanView />
               )}
-            </div>
-          </Panel>
-        </PanelGroup>
+          </div>
       </div>
 
       {/* Mobile content */}
@@ -223,6 +225,7 @@ export function AppShell() {
               onResolve={(item) => handleResolve(item)}
               onDrop={(item) => handleDrop(item)}
               onStartThinking={(item) => handleStartThinking(item)}
+              onEdit={handleEdit}
             />
           </div>
         ) : (

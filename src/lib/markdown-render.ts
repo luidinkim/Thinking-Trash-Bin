@@ -15,6 +15,9 @@ export function buildMarkdownBody(item: BinItem): string {
   if (item.impact) {
     sections.push(`## 영향 범위\n\n${item.impact}`)
   }
+  if (item.thinkingNotes) {
+    sections.push(`---\n\n## 생각 노트\n\n${item.thinkingNotes}`)
+  }
 
   return sections.join('\n\n')
 }

@@ -39,7 +39,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   }
 
   return (
-    <div className="w-56 h-full bg-card border-r border-border flex flex-col">
+    <div className="w-56 shrink-0 h-full bg-card border-r border-border flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
