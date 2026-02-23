@@ -17,7 +17,7 @@ import { ThinkingSession } from '../thinking/thinking-session'
 import { TimerDialog } from '../thinking/timer-dialog'
 import { useBinItems } from '../../hooks/use-bin-items'
 import { useThinking } from '../../contexts/thinking-context'
-import { useToast } from '../../contexts/toast-context'
+import { toast } from 'sonner'
 import type { BinItem } from '../../types/bin-item'
 import type { QuickCaptureData } from '../quick-capture'
 
@@ -29,43 +29,41 @@ export function AppShell() {
   const [thinkingItem, setThinkingItem] = useState<BinItem | null>(null)
   const { items, createItem, promoteItem, updateItemStatus, updateItemContent } = useBinItems()
   const { startSession } = useThinking()
-  const { addToast } = useToast()
-
   const availableTags = [...new Set(items.flatMap(i => i.tags))]
 
   const handleSave = async (data: QuickCaptureData) => {
     try {
       await createItem(data)
-      addToast('항목이 생성되었습니다', 'success')
+      toast.success('항목이 생성되었습니다')
     } catch {
-      addToast('오류가 발생했습니다', 'error')
+      toast.error('오류가 발생했습니다')
     }
   }
 
   const handlePromote = async (item: Parameters<typeof promoteItem>[0]) => {
     try {
       await promoteItem(item)
-      addToast('팀 Bin으로 승격되었습니다', 'success')
+      toast.success('팀 Bin으로 승격되었습니다')
     } catch {
-      addToast('오류가 발생했습니다', 'error')
+      toast.error('오류가 발생했습니다')
     }
   }
 
   const handleResolve = async (item: Parameters<typeof updateItemStatus>[0]) => {
     try {
       await updateItemStatus(item, 'resolved')
-      addToast('해결됨으로 변경되었습니다', 'success')
+      toast.success('해결됨으로 변경되었습니다')
     } catch {
-      addToast('오류가 발생했습니다', 'error')
+      toast.error('오류가 발생했습니다')
     }
   }
 
   const handleDrop = async (item: Parameters<typeof updateItemStatus>[0]) => {
     try {
       await updateItemStatus(item, 'dropped')
-      addToast('폐기되었습니다', 'info')
+      toast.info('폐기되었습니다')
     } catch {
-      addToast('오류가 발생했습니다', 'error')
+      toast.error('오류가 발생했습니다')
     }
   }
 
@@ -90,9 +88,9 @@ export function AppShell() {
         : newNote
 
       await updateItemContent(item, { thinkingNotes: updatedNotes })
-      addToast('생각 메모가 저장되었습니다', 'success')
+      toast.success('생각 메모가 저장되었습니다')
     } catch {
-      addToast('메모 저장에 실패했습니다', 'error')
+      toast.error('메모 저장에 실패했습니다')
     }
   }
 
