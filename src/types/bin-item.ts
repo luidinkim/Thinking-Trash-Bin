@@ -16,6 +16,7 @@ export interface BinItem {
   currentStructure: string // 현재 구조
   idea: string             // 개선 아이디어
   impact: string           // 영향 범위
+  thinkingNotes: string    // 생각 노트 섹션 전체 원문
   // Metadata (not stored in frontmatter)
   filePath: string         // GitHub repo path
   sha: string              // Git blob SHA for updates

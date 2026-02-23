@@ -65,6 +65,7 @@ export function useBinItems() {
       currentStructure: data.currentStructure,
       idea: data.idea,
       impact: data.impact,
+      thinkingNotes: '',
       filePath: '',
       sha: '',
     }

@@ -49,6 +49,7 @@ export function parseBinItem(markdown: string, filePath: string, sha: string): B
     currentStructure: extractSection(content, '현재 구조'),
     idea: extractSection(content, '개선 아이디어'),
     impact: extractSection(content, '영향 범위'),
+    thinkingNotes: extractSection(content, '생각 노트'),
     filePath,
     sha,
   }
@@ -73,7 +74,11 @@ export function serializeBinItem(item: BinItem): string {
     `## 현재 구조\n${item.currentStructure}`,
     `## 개선 아이디어\n${item.idea}`,
     `## 영향 범위\n${item.impact}`,
-  ].join('\n\n')
+  ]
 
-  return `${frontmatter}\n\n${sections}\n`
+  if (item.thinkingNotes) {
+    sections.push(`## 생각 노트\n${item.thinkingNotes}`)
+  }
+
+  return `${frontmatter}\n\n${sections.join('\n\n')}\n`
 }
