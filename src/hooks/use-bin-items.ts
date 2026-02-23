@@ -98,5 +98,13 @@ export function useBinItems() {
     await fetchItems()
   }, [github, fetchItems, setSelectedItem])
 
-  return { items, createItem, promoteItem, updateItemStatus, refreshItems: fetchItems }
+  const updateItemContent = useCallback(async (item: BinItem, patch: Partial<BinItem>) => {
+    if (!github) return
+    const updated: BinItem = { ...item, ...patch }
+    const content = serializeBinItem(updated)
+    await github.updateItem(item.filePath, content, item.sha, `update: ${item.title}`)
+    await fetchItems()
+  }, [github, fetchItems])
+
+  return { items, createItem, promoteItem, updateItemStatus, updateItemContent, refreshItems: fetchItems }
 }

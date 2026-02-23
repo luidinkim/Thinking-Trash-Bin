@@ -13,15 +13,22 @@ import { ListPanel } from './list-panel'
 import { DetailPanel } from './detail-panel'
 import { QuickCapture } from '../quick-capture'
 import { KanbanView } from '../kanban-view'
+import { ThinkingSession } from '../thinking/thinking-session'
+import { TimerDialog } from '../thinking/timer-dialog'
 import { useBinItems } from '../../hooks/use-bin-items'
+import { useThinking } from '../../contexts/thinking-context'
 import { useToast } from '../../contexts/toast-context'
+import type { BinItem } from '../../types/bin-item'
 import type { QuickCaptureData } from '../quick-capture'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [captureOpen, setCaptureOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
-  const { items, createItem, promoteItem, updateItemStatus } = useBinItems()
+  const [timerDialogOpen, setTimerDialogOpen] = useState(false)
+  const [thinkingItem, setThinkingItem] = useState<BinItem | null>(null)
+  const { items, createItem, promoteItem, updateItemStatus, updateItemContent } = useBinItems()
+  const { startSession } = useThinking()
   const { addToast } = useToast()
 
   const availableTags = [...new Set(items.flatMap(i => i.tags))]
@@ -59,6 +66,33 @@ export function AppShell() {
       addToast('폐기되었습니다', 'info')
     } catch {
       addToast('오류가 발생했습니다', 'error')
+    }
+  }
+
+  const handleStartThinking = (item: BinItem) => {
+    setThinkingItem(item)
+    setTimerDialogOpen(true)
+  }
+
+  const handleThinkingStart = (item: BinItem, minutes: number) => {
+    startSession(item, minutes)
+  }
+
+  const handleSaveThinkingMemo = async (item: BinItem, memo: string, elapsedMinutes: number) => {
+    if (!memo.trim()) return
+    try {
+      const now = new Date()
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      const newNote = `### ${timestamp} (${elapsedMinutes}분)\n${memo}`
+
+      const updatedNotes = item.thinkingNotes
+        ? `${newNote}\n\n${item.thinkingNotes}`
+        : newNote
+
+      await updateItemContent(item, { thinkingNotes: updatedNotes })
+      addToast('생각 메모가 저장되었습니다', 'success')
+    } catch {
+      addToast('메모 저장에 실패했습니다', 'error')
     }
   }
 
@@ -169,6 +203,7 @@ export function AppShell() {
                       onPromote={(item) => handlePromote(item)}
                       onResolve={(item) => handleResolve(item)}
                       onDrop={(item) => handleDrop(item)}
+                      onStartThinking={(item) => handleStartThinking(item)}
                     />
                   </Panel>
                 </PanelGroup>
@@ -189,6 +224,7 @@ export function AppShell() {
               onPromote={(item) => handlePromote(item)}
               onResolve={(item) => handleResolve(item)}
               onDrop={(item) => handleDrop(item)}
+              onStartThinking={(item) => handleStartThinking(item)}
             />
           </div>
         ) : (
@@ -212,6 +248,22 @@ export function AppShell() {
         onClose={() => setCaptureOpen(false)}
         onSave={handleSave}
         availableTags={availableTags}
+      />
+
+      {/* Thinking session (renders as fixed overlay for fullscreen/split, inline for overlay) */}
+      <ThinkingSession
+        onSave={handleSaveThinkingMemo}
+        onPromote={handlePromote}
+        onResolve={handleResolve}
+        onDrop={handleDrop}
+      />
+
+      {/* Timer dialog for selecting thinking duration */}
+      <TimerDialog
+        item={thinkingItem}
+        open={timerDialogOpen}
+        onOpenChange={setTimerDialogOpen}
+        onStart={handleThinkingStart}
       />
     </div>
   )
