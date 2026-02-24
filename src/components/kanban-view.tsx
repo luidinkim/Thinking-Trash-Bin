@@ -100,6 +100,7 @@ export function KanbanView() {
   const { items, setSelectedItem, searchQuery, priorityFilter } = useBin()
 
   const filtered = items.filter(item => {
+    if (item.status === 'dropped') return false
     if (priorityFilter.size > 0 && !priorityFilter.has(item.priority)) return false
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()

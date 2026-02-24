@@ -20,9 +20,16 @@ export function ListPanel() {
     setSearchQuery,
     priorityFilter,
     togglePriorityFilter,
+    trashMode,
   } = useBin()
 
   const filtered = items.filter(item => {
+    // trash mode: only show dropped items; normal mode: hide dropped items
+    if (trashMode) {
+      if (item.status !== 'dropped') return false
+    } else {
+      if (item.status === 'dropped') return false
+    }
     if (priorityFilter.size > 0 && !priorityFilter.has(item.priority)) return false
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
@@ -82,10 +89,19 @@ export function ListPanel() {
         ))}
       </div>
 
+      {/* Trash mode header */}
+      {trashMode && (
+        <div className="px-3 py-2 border-b border-border bg-destructive/5">
+          <p className="text-sm font-medium text-destructive">쓰레기통</p>
+        </div>
+      )}
+
       {/* Item list */}
       {filtered.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground text-sm">항목이 없습니다</p>
+          <p className="text-muted-foreground text-sm">
+            {trashMode ? '쓰레기통이 비어있습니다' : '항목이 없습니다'}
+          </p>
         </div>
       ) : (
         <ScrollArea className="flex-1">

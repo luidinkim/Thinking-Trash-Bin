@@ -106,5 +106,35 @@ export function useBinItems() {
     await fetchItems()
   }, [github, fetchItems])
 
-  return { items, createItem, promoteItem, updateItemStatus, updateItemContent, refreshItems: fetchItems }
+  const restoreItem = useCallback(async (item: BinItem) => {
+    if (!github) return
+    const updated: BinItem = { ...item, status: 'open' }
+    const content = serializeBinItem(updated)
+    await github.updateItem(item.filePath, content, item.sha, `restore: ${item.title}`)
+    setSelectedItem(null)
+    await fetchItems()
+  }, [github, fetchItems, setSelectedItem])
+
+  const deleteItemPermanently = useCallback(async (item: BinItem) => {
+    if (!github) return
+    await github.deleteItem(item.filePath, item.sha, `delete: ${item.title}`)
+    setSelectedItem(null)
+    await fetchItems()
+  }, [github, fetchItems, setSelectedItem])
+
+  const emptyTrash = useCallback(async () => {
+    if (!github) return
+    const droppedItems = items.filter(i => i.status === 'dropped')
+    for (const item of droppedItems) {
+      await github.deleteItem(item.filePath, item.sha, `delete: ${item.title}`)
+    }
+    setSelectedItem(null)
+    await fetchItems()
+  }, [github, items, fetchItems, setSelectedItem])
+
+  return {
+    items, createItem, promoteItem, updateItemStatus, updateItemContent,
+    restoreItem, deleteItemPermanently, emptyTrash,
+    refreshItems: fetchItems,
+  }
 }

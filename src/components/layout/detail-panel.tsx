@@ -14,6 +14,9 @@ interface DetailPanelProps {
   onResolve?: (item: BinItem) => void
   onDrop?: (item: BinItem) => void
   onStartThinking?: (item: BinItem) => void
+  onRestore?: (item: BinItem) => void
+  onDeletePermanently?: (item: BinItem) => void
+  onEmptyTrash?: () => void
 }
 
 const priorityLabels: Record<Priority, string> = {
@@ -88,13 +91,27 @@ export function DetailPanel({
   onResolve,
   onDrop,
   onStartThinking,
+  onRestore,
+  onDeletePermanently,
+  onEmptyTrash,
 }: DetailPanelProps) {
-  const { selectedItem, scope } = useBin()
+  const { selectedItem, scope, trashMode } = useBin()
 
   if (!selectedItem) {
     return (
-      <div className="flex-1 h-full bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">항목을 선택하세요</p>
+      <div className="flex-1 h-full bg-background flex flex-col items-center justify-center gap-3">
+        <p className="text-muted-foreground text-sm">
+          {trashMode ? '삭제할 항목을 선택하세요' : '항목을 선택하세요'}
+        </p>
+        {trashMode && onEmptyTrash && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onEmptyTrash}
+          >
+            비우기
+          </Button>
+        )}
       </div>
     )
   }
@@ -141,7 +158,7 @@ export function DetailPanel({
       </div>
 
       {/* "생각하기" button */}
-      {onStartThinking && (
+      {onStartThinking && !trashMode && (
         <>
           <div className="px-6 py-3">
             <Button
@@ -169,29 +186,60 @@ export function DetailPanel({
 
       {/* Action bar */}
       <div className="p-4 border-t border-border flex gap-2">
-        {scope === 'personal' && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPromote?.(selectedItem)}
-          >
-            ↑ 승격
-          </Button>
+        {trashMode ? (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onRestore?.(selectedItem)}
+            >
+              복원
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDeletePermanently?.(selectedItem)}
+            >
+              영구 삭제
+            </Button>
+            <div className="flex-1" />
+            {onEmptyTrash && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={onEmptyTrash}
+              >
+                비우기
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
+            {scope === 'personal' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPromote?.(selectedItem)}
+              >
+                ↑ 승격
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onResolve?.(selectedItem)}
+            >
+              ✓ 해결
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDrop?.(selectedItem)}
+            >
+              × 폐기
+            </Button>
+          </>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onResolve?.(selectedItem)}
-        >
-          ✓ 해결
-        </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDrop?.(selectedItem)}
-        >
-          × 폐기
-        </Button>
       </div>
     </div>
   )
