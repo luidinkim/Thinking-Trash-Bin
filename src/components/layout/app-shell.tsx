@@ -27,7 +27,7 @@ export function AppShell() {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
   const [timerDialogOpen, setTimerDialogOpen] = useState(false)
   const [thinkingItem, setThinkingItem] = useState<BinItem | null>(null)
-  const { items, createItem, promoteItem, updateItemStatus, updateItemContent } = useBinItems()
+  const { items, createItem, promoteItem, updateItemStatus, updateItemContent, restoreItem, deleteItemPermanently, emptyTrash } = useBinItems()
   const { startSession } = useThinking()
   const availableTags = [...new Set(items.flatMap(i => i.tags))]
 
@@ -73,6 +73,33 @@ export function AppShell() {
       toast.success('수정되었습니다')
     } catch {
       toast.error('수정에 실패했습니다')
+    }
+  }
+
+  const handleRestore = async (item: BinItem) => {
+    try {
+      await restoreItem(item)
+      toast.success('항목이 복원되었습니다')
+    } catch {
+      toast.error('오류가 발생했습니다')
+    }
+  }
+
+  const handleDeletePermanently = async (item: BinItem) => {
+    try {
+      await deleteItemPermanently(item)
+      toast.success('영구 삭제되었습니다')
+    } catch {
+      toast.error('오류가 발생했습니다')
+    }
+  }
+
+  const handleEmptyTrash = async () => {
+    try {
+      await emptyTrash()
+      toast.success('쓰레기통을 비웠습니다')
+    } catch {
+      toast.error('오류가 발생했습니다')
     }
   }
 
@@ -206,6 +233,9 @@ export function AppShell() {
                       onDrop={(item) => handleDrop(item)}
                       onStartThinking={(item) => handleStartThinking(item)}
                       onEdit={handleEdit}
+                      onRestore={(item) => handleRestore(item)}
+                      onDeletePermanently={(item) => handleDeletePermanently(item)}
+                      onEmptyTrash={handleEmptyTrash}
                     />
                   </Panel>
                 </PanelGroup>
@@ -226,6 +256,9 @@ export function AppShell() {
               onDrop={(item) => handleDrop(item)}
               onStartThinking={(item) => handleStartThinking(item)}
               onEdit={handleEdit}
+              onRestore={(item) => handleRestore(item)}
+              onDeletePermanently={(item) => handleDeletePermanently(item)}
+              onEmptyTrash={handleEmptyTrash}
             />
           </div>
         ) : (

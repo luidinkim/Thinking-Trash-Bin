@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Brain, FolderOpen, Users, Settings, LogOut, X } from 'lucide-react'
+import { Brain, FolderOpen, Users, Settings, LogOut, X, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -15,14 +15,19 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onClose }: SidebarProps) {
-  const { scope, setScope, items } = useBin()
+  const { scope, setScope, items, trashMode, setTrashMode } = useBin()
   const { user, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const priorityCounts: Record<Priority, number> = { S: 0, A: 0, B: 0 }
   const tagSet = new Set<string>()
+  let droppedCount = 0
 
   for (const item of items) {
+    if (item.status === 'dropped') {
+      droppedCount++
+      continue
+    }
     if (item.priority in priorityCounts) {
       priorityCounts[item.priority]++
     }
@@ -35,6 +40,12 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   const handleScopeChange = (newScope: 'personal' | 'team') => {
     setScope(newScope)
+    setTrashMode(false)
+    onClose?.()
+  }
+
+  const handleTrashClick = () => {
+    setTrashMode(!trashMode)
     onClose?.()
   }
 
@@ -132,6 +143,29 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      <Separator />
+
+      {/* Trash button */}
+      <div className="px-3 py-2">
+        <Button
+          variant={trashMode ? 'secondary' : 'ghost'}
+          size="sm"
+          className={cn(
+            'w-full justify-start gap-2',
+            !trashMode && 'text-muted-foreground',
+          )}
+          onClick={handleTrashClick}
+        >
+          <Trash2 className="h-4 w-4" />
+          Trash
+          {droppedCount > 0 && (
+            <Badge variant="outline" className="ml-auto text-xs px-1.5 py-0">
+              {droppedCount}
+            </Badge>
+          )}
+        </Button>
+      </div>
 
       <Separator />
 

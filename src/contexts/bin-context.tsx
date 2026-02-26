@@ -17,6 +17,8 @@ interface BinState {
   toggleTagFilter: (tag: string) => void
   loading: boolean
   setLoading: (loading: boolean) => void
+  trashMode: boolean
+  setTrashMode: (trashMode: boolean) => void
 }
 
 const BinContext = createContext<BinState | null>(null)
@@ -29,6 +31,7 @@ export function BinProvider({ children }: { children: ReactNode }) {
   const [priorityFilter, setPriorityFilter] = useState<Set<string>>(new Set())
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
+  const [trashMode, setTrashMode] = useState(false)
 
   const togglePriorityFilter = useCallback((p: string) => {
     setPriorityFilter(prev => {
@@ -64,6 +67,7 @@ export function BinProvider({ children }: { children: ReactNode }) {
         priorityFilter, togglePriorityFilter,
         tagFilter, toggleTagFilter,
         loading, setLoading,
+        trashMode, setTrashMode,
       }}
     >
       {children}
